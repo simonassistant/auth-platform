@@ -9,7 +9,7 @@ Before starting your integration, ensure you have the following:
 * **Secure Connection:** All production requests must be accessed via `https://`.
 * **Registered Client:** You must possess a valid `client_id` and `client_secret`.
 * **Redirect URI:** A callback URL in your application where the authorization code will be sent.
-
+* **User Registration:** Your users can register accounts at [our website](https://auth.hkbu.tech).
 ---
 
 ## 1. Register Your Client
@@ -27,7 +27,7 @@ To get started, contact the system administrator to register your application. Y
 
 To begin the flow, redirect the user's browser to our authorization endpoint. This allows the user to log in and grant your application permission.
 
-**Endpoint:** `GET https://auth.domain.com/auth-provider/login`
+**Endpoint:** `GET https://auth.hkbu.tech/auth-provider/login`
 
 ### Query Parameters
 
@@ -40,14 +40,14 @@ To begin the flow, redirect the user's browser to our authorization endpoint. Th
 **Example URL:**
 
 ```text
-https://auth.domain.com/auth-provider/login?client_id=your-client-id&redirect_uri=https://yourapp.com/callback&state=xyz123
+https://auth.hkbu.tech/auth-provider/login?client_id=your-client-id&redirect_uri=https://yourapp.com/callback&state=xyz123
 
 ```
 
 ### The Callback
 
 After the user authenticates, they will be redirected back to your `redirect_uri` with a temporary code:
-`https://yourapp.com/callback?code=abc123&state=xyz123`
+`https://yourapp.com/callback?code=abc123&state=xyz123`. You can verify the request against `state` to ensure that this is the request sent from your server, but this is optional.
 
 ---
 
@@ -55,7 +55,7 @@ After the user authenticates, they will be redirected back to your `redirect_uri
 
 Once you have the `code`, your **backend server** must exchange it for an Access Token. This must be a server-to-server POST request.
 
-**Endpoint:** `POST https://auth.domain.com/api/oauth/token`
+**Endpoint:** `POST https://auth.hkbu.tech/api/oauth/token`
 
 **Content-Type:** `application/json`
 
