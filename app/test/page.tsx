@@ -2,13 +2,13 @@ import Link from 'next/link';
 
 const CLIENT_ID = 'test_client_public_id';
 const CLIENT_SECRET = 'sk-test_key';
-const REDIRECT_URI = 'http://localhost:3000/redirect';
+const REDIRECT_URI = 'https://auth.hkbu.tech/redirect';
 const AUTH_BASE_URL = '/auth-provider/login';
 const TOKEN_ENDPOINT = '/api/oauth/token';
 
 export default function OAuthTestPage() {
   const state = Math.random().toString(36).substring(2, 15);
-  const authUrl = new URL(AUTH_BASE_URL, 'http://localhost:3000');
+  const authUrl = new URL(AUTH_BASE_URL, 'https://auth.hkbu.tech');
   authUrl.searchParams.set('client_id', CLIENT_ID);
   authUrl.searchParams.set('redirect_uri', REDIRECT_URI);
   authUrl.searchParams.set('state', state);
@@ -102,20 +102,20 @@ export default function OAuthTestPage() {
           <h3 className="text-2xl font-bold mb-6">💻 Manual cURL Test (Optional)</h3>
           <div className="bg-black/50 p-6 rounded-xl overflow-auto">
             <pre className="text-green-400 font-mono text-sm leading-relaxed">
-{`curl -X POST http://localhost:3000${TOKEN_ENDPOINT} \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "code": "your-auth-code-here",
-    "client_id": "${CLIENT_ID}",
-    "client_secret": "${CLIENT_SECRET}"
-  }'`}
+              {`curl -X POST https://auth.hkbu.tech${TOKEN_ENDPOINT} \\
+                  -H "Content-Type: application/json" \\
+                  -d '{
+                    "code": "your-auth-code-here",
+                    "client_id": "${CLIENT_ID}",
+                    "client_secret": "${CLIENT_SECRET}"
+                  }'`}
             </pre>
           </div>
         </div>
 
         <div className="mt-8 text-center text-sm text-gray-500">
           <p>
-            Need a test user? Check your <code>users</code> table. 
+            Need a test user? Check your <code>users</code> table.
             Authorization codes expire in ~10 minutes and are single-use.
           </p>
         </div>
