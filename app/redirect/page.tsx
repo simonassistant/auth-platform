@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
-export default function RedirectCallback() {
+function RedirectCallbackContent() {
   const searchParams = useSearchParams();
   const code = searchParams.get('code');
   const state = searchParams.get('state');
@@ -15,7 +15,7 @@ export default function RedirectCallback() {
   const client_id = 'test_client_public_id';
   const client_secret = 'sk-test_key';
 
-  const exchangeCodeForToken = async (codeToExchange) => {
+  const exchangeCodeForToken = async (codeToExchange: string) => {
     setLoading(true);
     setError('');
     try {
@@ -39,7 +39,7 @@ export default function RedirectCallback() {
         setError(JSON.stringify(data, null, 2));
       }
     } catch (err) {
-      setError(`Exchange failed: ${err.message}`);
+      setError(`Exchange failed: ${err instanceof Error ? err.message : String(err)}`);
     } finally {
       setLoading(false);
     }
@@ -116,5 +116,20 @@ export default function RedirectCallback() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function RedirectCallback() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full bg-white rounded-lg shadow-xl p-8 text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <p className="mt-2 text-gray-600">Loading callback...</p>
+        </div>
+      </div>
+    }>
+      <RedirectCallbackContent />
+    </Suspense>
   );
 }
