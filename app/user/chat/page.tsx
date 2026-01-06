@@ -31,7 +31,7 @@ export default function ChatPage() {
                 body: JSON.stringify({
                     messages: newMessages,
                     model: `${selectedProvider}:${selectedModel}`,
-                    stream: selectedProvider === 'hkbu' ? false : streaming,
+                    stream: streaming,
                     apiVersion: selectedProvider === 'hkbu' ? apiVersion : undefined,
                 }),
             });
@@ -120,6 +120,8 @@ export default function ChatPage() {
                         {selectedProvider === 'hkbu' ? (
                             <>
                                 <option value="gpt-4.1">gpt-4.1</option>
+                                <option value="gpt-5">gpt-5</option>
+                                <option value="gpt-5-mini">gpt-5-mini</option>
                             </>
                         ) : (
                             <>
@@ -130,10 +132,9 @@ export default function ChatPage() {
                     </select>
                     <button
                         onClick={() => setStreaming(!streaming)}
-                        disabled={selectedProvider === 'hkbu'}
-                        className={`px-3 py-1 rounded text-sm font-medium ${streaming && selectedProvider !== 'hkbu' ? 'bg-green-500 text-white' : 'bg-gray-300 text-black'}`}
+                        className={`px-3 py-1 rounded text-sm font-medium ${streaming ? 'bg-green-500 text-white' : 'bg-gray-300 text-black'}`}
                     >
-                        Streaming: {streaming && selectedProvider !== 'hkbu' ? 'ON' : 'OFF'}
+                        Streaming: {streaming ? 'ON' : 'OFF'}
                     </button>
                     <Link href="/user/dashboard" className="text-blue-500 hover:underline">
                         Back to Dashboard

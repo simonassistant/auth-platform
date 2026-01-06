@@ -28,70 +28,44 @@ export async function POST(req: Request) {
 
     let apiKey = '';
     let baseURL = '';
+    let defaultHeaders: any = undefined;
+    let defaultQuery: any = undefined;
 
     if (model.startsWith('hkbu')) {
-      apiKey = currentKeys.hkbu;
-      console.log('HKBU API Key present:', !!apiKey);
-      if (!apiKey) {
+      const rawKey = currentKeys.hkbu;
+      if (!rawKey) {
         return NextResponse.json({ error: `API key for HKBU not found. Please add it in settings.` }, { status: 400 });
       }
-      const cleanApiKey = apiKey.includes('_') ? apiKey.split('_')[1] : apiKey;
-      console.log('HKBU Clean API Key length:', cleanApiKey?.length);
+      apiKey = rawKey.includes('_') ? rawKey.split('_')[1] : rawKey;
       const modelDeploymentName = model.split(':')[1] || 'gpt-4.1';
-      let url = `https://genai.hkbu.edu.hk/api/v0/rest/deployments/${modelDeploymentName}/chat/completions`;
+      baseURL = `https://genai.hkbu.edu.hk/api/v0/rest/deployments/${modelDeploymentName}`;
+      defaultHeaders = { 'api-key': apiKey };
       if (apiVersion) {
-        url += `?api-version=${apiVersion}`;
+        defaultQuery = { 'api-version': apiVersion };
       }
-      console.log('HKBU Request URL:', url);
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'accept': 'application/json',
-          'api-key': cleanApiKey,
-        },
-        body: JSON.stringify({
-          messages,
-          stream: false,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }));
-        console.error('HKBU API Error Response:', {
-          status: response.status,
-          statusText: response.statusText,
-          errorData
-        });
-        return NextResponse.json({ error: errorData.error?.message || `HKBU API error: ${response.statusText}` }, { status: response.status });
+    } else {
+      if (model.startsWith('openrouter')) {
+        apiKey = currentKeys.openrouter;
+        baseURL = 'https://openrouter.ai/api/v1';
+      } else if (model.startsWith('kimi')) {
+        apiKey = currentKeys.kimi;
+        baseURL = 'https://api.moonshot.cn/v1';
+      } else if (model.startsWith('blt')) {
+        apiKey = currentKeys.blt;
+        baseURL = 'https://api.bltcy.ai/v1';
       }
 
-      const data = await response.json();
-      return NextResponse.json({ content: data.choices[0].message.content });
+      if (!apiKey) {
+        return NextResponse.json({ error: `API key for ${model} not found. Please add it in settings.` }, { status: 400 });
+      }
+      apiKey = apiKey.includes('_') ? apiKey.split('_')[1] : apiKey;
     }
-
-    if (model.startsWith('openrouter')) {
-      apiKey = currentKeys.openrouter;
-      baseURL = 'https://openrouter.ai/api/v1';
-    } else if (model.startsWith('kimi')) {
-      apiKey = currentKeys.kimi;
-      baseURL = 'https://api.moonshot.cn/v1';
-    } else if (model.startsWith('blt')) {
-      apiKey = currentKeys.blt;
-      baseURL = 'https://api.bltcy.ai/v1';
-    }
-
-    if (!apiKey) {
-      return NextResponse.json({ error: `API key for ${model} not found. Please add it in settings.` }, { status: 400 });
-    }
-
-    // Remove prefix if it exists (e.g., "openrouter_sk-...")
-    const cleanApiKey = apiKey.includes('_') ? apiKey.split('_')[1] : apiKey;
 
     const openai = new OpenAI({
-      apiKey: cleanApiKey,
+      apiKey: apiKey,
       baseURL: baseURL,
+      defaultHeaders,
+      defaultQuery,
     });
 
     if (stream) {
