@@ -105,7 +105,7 @@ You can inspect the token payload at [jwt.io](https://jwt.io).
 All requests to the following endpoints must be authenticated. 
 - **Format:** The `access_token` obtained from the token exchange.
 - **Placement:** 
-  - **Cookie:** A cookie named `token` containing the JWT.
+  - **Headers:** The bearar token must be placed in the request headers.
 
 ---
 
