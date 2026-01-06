@@ -49,8 +49,7 @@ To begin the flow, redirect the user's browser to our authorization endpoint. Th
 | \`redirect_uri\` | Yes | The URL to return the user to after login. |
 | \`state\` | No | A random string used to prevent CSRF attacks (highly recommended). |
 
-The state must be stored as HTTP only Cookies for safety.
-
+The state must be stored in sessionStorage or HTTP only Cookies for safety.
 **Example URL:**
 
 \`\`\`text
