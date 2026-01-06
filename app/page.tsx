@@ -76,11 +76,6 @@ function AuthForm() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <h1 className="text-2xl font-bold mb-6">Simple Auth Demo</h1>
-      <div className="mb-6">
-        <a href="/docs" className="text-blue-500 hover:underline text-sm">
-          View OAuth 2.0 Usage Guide
-        </a>
-      </div>
       {tenant_key && (
         <p className="mb-4 text-sm text-gray-500">
           Authenticating for tenant: <span className="font-mono">{tenant_key}</span>
@@ -116,6 +111,11 @@ function AuthForm() {
           </button>
         </div>
         {message && <p className="mt-4 text-center text-sm">{message}</p>}
+        <div className="mt-8 text-center">
+          <a href="/docs" className="text-blue-500 hover:underline text-sm">
+            OAuth 2.0 Integration Guide
+          </a>
+        </div>
       </div>
     </div>
   );

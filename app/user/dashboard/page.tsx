@@ -60,20 +60,12 @@ export default function Dashboard() {
         <div className="flex flex-col items-center justify-center min-h-screen p-8 gap-8">
             <div className="flex justify-between items-center w-full max-w-2xl">
                 <h1 className="text-2xl font-bold">Dashboard</h1>
-                <div className="flex gap-4">
-                    <Link 
-                        href="/docs" 
-                        className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors"
-                    >
-                        API Docs
-                    </Link>
-                    <Link 
-                        href="/user/chat" 
-                        className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
-                    >
-                        Go to Chat
-                    </Link>
-                </div>
+                <Link 
+                    href="/user/chat" 
+                    className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors"
+                >
+                    Go to Chat
+                </Link>
             </div>
 
             <div className="flex flex-col gap-4 w-full max-w-md bg-white p-6 rounded shadow-md">
