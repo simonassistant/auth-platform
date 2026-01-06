@@ -54,13 +54,13 @@ export async function POST(req: Request) {
     const now = new Date();
 
     // Ensure we're comparing UTC times to avoid timezone-related "always expired" issues
-    
+
     // The database driver returns TIMESTAMPTZ as a Date object.
-    const expiresAt = authCode.expires_at instanceof Date 
-      ? authCode.expires_at 
+    const expiresAt = authCode.expires_at instanceof Date
+      ? authCode.expires_at
       : new Date(authCode.expires_at as string);
 
-    
+
     const isExpired = now.getTime() > expiresAt.getTime();
 
     if (authCode.used === true || isExpired) {
@@ -88,7 +88,7 @@ export async function POST(req: Request) {
       sub: userId,
       aud: client_id,
       iat: Math.floor(Date.now() / 1000),
-      exp: Math.floor(Date.now() / 1000) + 3600, // 1 hour
+      exp: Math.floor(Date.now() / 1000) + 3600 * 24 * 5, // 5 days
     };
 
     const access_token = jwt.sign(payload, process.env.JWT_SECRET!, { algorithm: 'HS256' });
@@ -97,7 +97,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       access_token,
       token_type: 'Bearer',
-      expires_in: 3600,
+      expires_in: '5d',
     });
 
   } catch (error) {

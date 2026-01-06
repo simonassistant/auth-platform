@@ -98,3 +98,80 @@ You can inspect the token payload at [jwt.io](https://jwt.io).
 * **exp**: The expiration timestamp (tokens are valid for 1 hour).
 
 ---
+
+## 5. API Reference
+
+### Authentication for Protected Endpoints
+All requests to the following endpoints must be authenticated. 
+- **Format:** The `access_token` obtained from the token exchange.
+- **Placement:** 
+  - **Cookie:** A cookie named `token` containing the JWT.
+
+---
+
+### User API Keys
+Manage your external provider API keys (HKBU, OpenRouter, Kimi, etc.).
+
+#### **GET** `/api/user/api-keys`
+Fetch all stored API keys for the authenticated user.
+
+**Response (200 OK):**
+```json
+{
+  "api_keys": {
+    "hkbu": "hkbu_...",
+    "openrouter": "openrouter_...",
+    "kimi": "kimi_..."
+  }
+}
+```
+
+#### **POST** `/api/user/api-keys`
+Update or add an API key for a specific provider.
+
+**Request Body:**
+```json
+{
+  "keyType": "hkbu",
+  "apiKey": "your-actual-api-key"
+}
+```
+*Note: The server automatically prefixes the key with the provider name (e.g., `hkbu_`).*
+
+---
+
+### Chat Completions
+Send messages to various AI models using your stored API keys.
+
+#### **POST** `/api/chat`
+Proxies requests to the selected provider.
+
+**Request Body:**
+```json
+{
+  "model": "provider:model_name",
+  "messages": [
+    { "role": "user", "content": "Hello!" }
+  ],
+  "stream": false,
+  "apiVersion": "2024-02-15-preview" 
+}
+```
+
+**Model Format Examples:**
+- `hkbu:gpt-4.1`
+- `openrouter:openai/gpt-4-turbo`
+- `kimi:moonshot-v1-8k`
+
+**Parameters:**
+- `model` (Required): String in `provider:model` format.
+- `messages` (Required): Array of message objects.
+- `stream` (Optional): Boolean. If `true`, returns a `text/plain` stream of tokens.
+- `apiVersion` (Optional): Specifically for HKBU requests.
+
+**Success Response (200 OK):**
+```json
+{
+  "content": "Hello! How can I help you today?"
+}
+```

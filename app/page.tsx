@@ -2,6 +2,7 @@
 
 import { useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
+import Swal from 'sweetalert2';
 
 function AuthForm() {
   const searchParams = useSearchParams();
@@ -21,8 +22,15 @@ function AuthForm() {
       });
       const data = await res.json();
       if (res.ok) {
-        setMessage(`${action === 'signup' ? 'Signed up' : 'Logged in'} successfully!`);
+        const successMessage = action === 'signup' ? 'Signed up successfully!' : 'Logged in successfully!';
         
+        await Swal.fire({
+          title: 'Success!',
+          text: successMessage,
+          icon: 'success',
+          confirmButtonColor: '#3b82f6',
+        });
+
         if (data.callback_url && data.token) {
           try {
             const url = new URL(data.callback_url);
@@ -32,18 +40,36 @@ function AuthForm() {
             return;
           } catch (e) {
             console.error('Invalid callback URL:', data.callback_url);
-            setMessage('Error: Invalid callback URL configured for tenant.');
+            Swal.fire({
+              title: 'Error!',
+              text: 'Invalid callback URL configured for tenant.',
+              icon: 'error',
+              confirmButtonColor: '#ef4444',
+            });
           }
         }
 
         if (data.token) {
           console.log('JWT Token:', data.token);
+          if (action === 'login' && !data.callback_url) {
+            window.location.href = '/user/dashboard';
+          }
         }
       } else {
-        setMessage(`Error: ${data.error}`);
+        Swal.fire({
+          title: 'Error!',
+          text: data.error || 'Something went wrong',
+          icon: 'error',
+          confirmButtonColor: '#ef4444',
+        });
       }
     } catch (err) {
-      setMessage('An error occurred.');
+      Swal.fire({
+        title: 'Error!',
+        text: 'An unexpected error occurred.',
+        icon: 'error',
+        confirmButtonColor: '#ef4444',
+      });
     }
   };
 

@@ -1,6 +1,6 @@
 ## Tables
 
----
+***
 
 ### `users`
 
@@ -14,8 +14,9 @@ Stores user account information.
 | `email` | `TEXT` | User email address (Unique, Not Null) |
 | `password` | `TEXT` | Hashed user password (Not Null) |
 | `created_at` | `TIMESTAMPTZ` | Timestamp of account creation (Default: `CURRENT_TIMESTAMP`) |
+| `api_keys` | `JSONB` | User API Keys format:{"provider":"key"}, example {"blt":"sk-xxx","openrouter":"sk-123"} |
 
----
+***
 
 ### `client_info`
 
@@ -34,12 +35,11 @@ Stores OAuth2/OpenID Connect client credentials and configurations.
 
 * **Primary Key:** `client_info_pkey` on `id`
 
----
+***
 
 ### `auth_codes`
 
 Stores temporary authorization codes for the OAuth flow.
-
 
 #### Columns
 
@@ -57,4 +57,4 @@ Stores temporary authorization codes for the OAuth flow.
 * **Foreign Key:** `client_id_constraint` references `public.client_info(id)`
 * **Foreign Key:** `user_id_constraint` references `public.users(id)`
 
----
+***
