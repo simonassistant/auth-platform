@@ -77,15 +77,34 @@ export async function POST(req: Request) {
 
     const userId = authCode.user_id;
 
-    // 3. Delete the authorization code (it has been verified and used)
+    // 3. Fetch user details
+    const users = await sql`
+      SELECT id, email 
+      FROM users 
+      WHERE id = ${userId} 
+      LIMIT 1
+    `;
+
+    if (users.length === 0) {
+      return NextResponse.json(
+        { error: 'invalid_grant', error_description: 'User not found' },
+        { status: 400 }
+      );
+    }
+
+    const user = users[0];
+
+    // 4. Delete the authorization code (it has been verified and used)
     await sql`
       DELETE FROM auth_codes 
       WHERE code = ${code}
     `;
 
-    // 4. Generate access token (JWT)
+  
+    // 5. Generate access token (JWT)
     const payload = {
-      sub: userId,
+      userId: user.id,
+      email: user.email,
       aud: client_id,
       iat: Math.floor(Date.now() / 1000),
       exp: Math.floor(Date.now() / 1000) + 3600 * 24 * 5, // 5 days
@@ -93,7 +112,7 @@ export async function POST(req: Request) {
 
     const access_token = jwt.sign(payload, process.env.JWT_SECRET!, { algorithm: 'HS256' });
 
-    // 5. Respond with token
+    // 6. Respond with token
     return NextResponse.json({
       access_token,
       token_type: 'Bearer',
