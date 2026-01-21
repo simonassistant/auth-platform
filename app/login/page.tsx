@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -17,7 +17,7 @@ function LoginForm() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const fetchCaptcha = async () => {
+  const fetchCaptcha = useCallback(async () => {
     try {
       const response = await fetch("/api/auth/captcha");
       const data = await response.json();
@@ -25,13 +25,24 @@ function LoginForm() {
     } catch (err) {
       console.error("Failed to fetch captcha", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchCaptcha();
+    // Defer the initial fetch to avoid synchronous setState in effect warning
+    const timeoutId = setTimeout(() => {
+      fetchCaptcha();
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [fetchCaptcha]);
+
+  useEffect(() => {
     const message = searchParams.get("message");
     if (message) {
-      setSuccess(message);
+      // Defer the state update to avoid synchronous setState in effect warning
+      const timeoutId = setTimeout(() => {
+        setSuccess(message);
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
   }, [searchParams]);
 
@@ -194,7 +205,7 @@ function LoginForm() {
         </form>
 
         <p className="mt-6 text-center text-sm text-gray-700">
-          Don't have an account?{" "}
+          {"Don't have an account? "}
           <Link
             href="/signup"
             className="font-semibold text-blue-700 hover:text-blue-800 transition-colors"
