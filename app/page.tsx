@@ -1,130 +1,91 @@
-'use client';
+"use client";
 
-import { useState, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
-import Swal from 'sweetalert2';
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-function AuthForm() {
-  const searchParams = useSearchParams();
-  const tenant_key = searchParams.get('tenant_key');
+interface User {
+  id: number;
+  name: string;
+  email: string;
+}
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [message, setMessage] = useState('');
+export default function Home() {
+  const [user, setUser] = useState<User | null>(null);
 
-  const handleAction = async (action: 'signup' | 'login') => {
-    setMessage('Processing...');
-    try {
-      const res = await fetch(`/api/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, tenant_key }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        const successMessage = action === 'signup' ? 'Signed up successfully!' : 'Logged in successfully!';
-        
-        await Swal.fire({
-          title: 'Success!',
-          text: successMessage,
-          icon: 'success',
-          confirmButtonColor: '#3b82f6',
-        });
-
-        if (data.callback_url && data.token) {
-          try {
-            const url = new URL(data.callback_url);
-            url.searchParams.append('token', data.token);
-            setMessage('Redirecting to tenant...');
-            window.location.href = url.toString();
-            return;
-          } catch (e) {
-            console.error('Invalid callback URL:', data.callback_url);
-            Swal.fire({
-              title: 'Error!',
-              text: 'Invalid callback URL configured for tenant.',
-              icon: 'error',
-              confirmButtonColor: '#ef4444',
-            });
-          }
+  useEffect(() => {
+    // Check if user is logged in
+    if (typeof window !== "undefined") {
+      const storedUser = localStorage.getItem("user");
+      if (storedUser) {
+        try {
+          setUser(JSON.parse(storedUser));
+        } catch (e) {
+          console.error("Error parsing user data:", e);
         }
-
-        if (data.token) {
-          console.log('JWT Token:', data.token);
-          if (action === 'login' && !data.callback_url) {
-            window.location.href = '/user/dashboard';
-          }
-        }
-      } else {
-        Swal.fire({
-          title: 'Error!',
-          text: data.error || 'Something went wrong',
-          icon: 'error',
-          confirmButtonColor: '#ef4444',
-        });
       }
-    } catch (err) {
-      Swal.fire({
-        title: 'Error!',
-        text: 'An unexpected error occurred.',
-        icon: 'error',
-        confirmButtonColor: '#ef4444',
-      });
+    }
+  }, []);
+
+  const handleLogout = () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("user");
+      setUser(null);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <h1 className="text-2xl font-bold mb-6">Simple Auth Demo</h1>
-      {tenant_key && (
-        <p className="mb-4 text-sm text-gray-500">
-          Authenticating for tenant: <span className="font-mono">{tenant_key}</span>
-        </p>
-      )}
-      <div className="flex flex-col gap-4 w-full max-w-xs">
-        <input
-          type="email"
-          placeholder="Email"
-          className="p-2 border rounded text-black"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          className="p-2 border rounded text-black"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <div className="flex gap-2">
-          <button
-            onClick={() => handleAction('signup')}
-            className="bg-blue-500 text-white p-2 rounded flex-1 cursor-pointer hover:bg-blue-600 transition-colors"
-          >
-            Sign Up
-          </button>
-          <button
-            onClick={() => handleAction('login')}
-            className="bg-green-500 text-white p-2 rounded flex-1 cursor-pointer hover:bg-green-600 transition-colors"
-          >
-            Login
-          </button>
+    <div className="flex min-h-screen items-center justify-center p-4 sm:p-8">
+      <main className="w-full max-w-4xl">
+        <div className="backdrop-blur-xl bg-white/30 rounded-3xl shadow-2xl border border-gray-200/50 p-8 sm:p-12">
+          <div className="flex flex-col items-center gap-8 text-center">
+            <div className="space-y-4">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent leading-tight">
+                Welcome to Bytewise AI
+              </h1>
+              {user ? (
+                <div className="space-y-6 mt-8">
+                  <div className="backdrop-blur-md bg-white/40 rounded-2xl p-6 border border-gray-200/50">
+                    <p className="text-xl sm:text-2xl text-gray-800 mb-2">
+                      Hello, <span className="font-bold text-blue-700">{user.name}</span>!
+                    </p>
+                    <p className="text-sm sm:text-base text-gray-700">
+                      {user.email}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleLogout}
+                    className="px-6 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                  >
+                    Log Out
+                  </button>
+                </div>
+              ) : (
+                <p className="text-lg sm:text-xl text-gray-700 max-w-2xl mx-auto mt-4">
+                  Get started by signing up or logging in to your account.
+                </p>
+              )}
+            </div>
+            
+            {!user && (
+              <div className="flex flex-col sm:flex-row gap-4 mt-8 w-full sm:w-auto">
+                <Link
+                  href="/signup"
+                  className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-2xl transform hover:scale-105 transition-all duration-200 overflow-hidden"
+                >
+                  <span className="relative z-10">Sign Up</span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-700 to-purple-700 opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                </Link>
+                <Link
+                  href="/login"
+                  className="px-8 py-4 bg-white/50 hover:bg-white/60 backdrop-blur-md text-gray-800 font-semibold rounded-xl border border-gray-300/50 shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                >
+                  Log In
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
-        {message && <p className="mt-4 text-center text-sm">{message}</p>}
-        <div className="mt-8 text-center">
-          <a href="/docs" className="text-blue-500 hover:underline text-sm">
-            OAuth 2.0 Integration Guide
-          </a>
-        </div>
-      </div>
+      </main>
     </div>
-  );
-}
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
-      <AuthForm />
-    </Suspense>
   );
 }
